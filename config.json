@@ -1,0 +1,14 @@
+{
+    "action" : "text",
+    "i" : "../test/images/guest.jpg",
+    "m" : "人生得意须尽欢",
+    "o" : "whoareu.jpg",
+    "p" : { 
+        "x" : "main_w/3",
+        "y" : "10",
+        "fontsize" : "66",
+        "fontfile" : "DroidSansFallbackFull.ttf",
+        "box" : "1",
+        "boxcolor" : "red"
+    }
+}
