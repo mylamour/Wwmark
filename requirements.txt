@@ -1,4 +1,8 @@
-Click==7.0
-ffmpeg_python==0.2.0
 opencv_python==4.2.0.32
+pdf2image==1.11.0
+ffmpeg_python==0.2.0
+Click==7.0
 ffmpeg==1.4
+kivy==1.11.1
+Pillow==7.0.0
+python_magic==0.4.15

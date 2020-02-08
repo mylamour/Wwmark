@@ -3,15 +3,17 @@ import sys
 import cv2
 import json
 import click
+import magic
 import ffmpeg
+import inspect
 
 from wwmark import Wwmark, OverlayImage, OverlayText
 
+mime = magic.Magic(mime=True)
 
 @click.group()
 def cli():
     pass
-
 
 @cli.command()
 @click.option('-f', help="Advanced mode, All from config file")
@@ -34,21 +36,24 @@ def text(i, m, o, p, b):
     if p != OverlayText.DEFAULT.value:
         p = json.loads(p)
 
+    if mime.from_file(i) == "application/pdf":
+        return Wwmark(i_file=i, i_mark=m, o_file=o, **p).pdf(inspect.stack()[0][3])
+
     Wwmark(i_file=i, i_mark=m, o_file=o, **p).text()
 
 @cli.command()
 @click.option('-i', help="Your input file path, it can be image or video")
 @click.option('-m', help="Your mark file path, it can be image or video")
 @click.option('-o', help="Your output file path, ")
-@click.option('-p', help='mark postion, with like this {"x": "main_w-overlay_w-5","y": "5"}', default=OverlayImage.BOTTOMLEFT.value)
+@click.option('-p', help='mark postion, with like this {"x": "main_w-overlay_w-5","y": "5"}', default=OverlayImage.DEFAULT.value)
 @click.option('-b', help='Blind or not?', default=False)
 def image(i, m, o, p, b):
 
-    if p != OverlayImage.BOTTOMLEFT.value:
+    if p != OverlayImage.DEFAULT.value:
         p = json.loads(p)
 
-    # if b:
-    #     p.append()
+    if mime.from_file(i) == "application/pdf":
+        return Wwmark(i_file=i, i_mark=m, o_file=o, **p).pdf(inspect.stack()[0][3])
 
     Wwmark(i_file=i, i_mark=m, o_file=o, **p).image()
 

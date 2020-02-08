@@ -7,16 +7,15 @@ It based on ffmpeg and opencv. There was 3 mode in wwmark. you can add text to a
 ```bash
 
 i➜  wwmark : master ✘ :✭ ᐅ  python main.py config -f config.json
-xxxxxxx
 
 i➜  wwmark : master ✘ :✭ ᐅ  python main.py image -i ../test/video/h.mp4 -m ../test/images/wm.png -o ssss.mp4
-xxxxxxx
 
 i➜  wwmark : master ✘ :✭ ᐅ  python main.py image -i ../test/video/h.mp4 -m ../test/images/wm.png -p '{ "x": "main_w-overlay_w-5","y": "5"}'  -o ssss.mp4
-xxxxxxx
 
 i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i ../test/images/guest.jpg -m "人生何处不相逢" -p '{"x":"10", "y":"10","fontsize":"66","fontfile":"DroidSansFallbackFull.ttf"}' -o ian.jpeg
-xxxxxxx
+
+i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i test/a.pdf -m "人生何处不相逢" -o b.pdf
+
 ```
 
 > it's good way to check your font file in linux system: `fc-list :lang=zh`
