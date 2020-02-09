@@ -86,7 +86,7 @@ def show(i, m, o, type):
     if str.lower(type) == "image" and i == None:
         # Only image with text blind, it's necessary need original image
         sys.exit(1)
-        
+
     return Wwmark(i_file=i, i_mark=m, o_file=o, blind=None).show(str.lower(type))
 
 # @click.group(chain=True)

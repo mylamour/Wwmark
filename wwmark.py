@@ -161,7 +161,7 @@ class Wwmark(object):
         def binary(integer):
             return "0"*(8-(len(bin(integer))-2))+bin(integer).replace('0b','')
 
-        img = Image.open(self.i_file)
+        img = Image.open(self.i_file).convert("RGBA")       # Convert it to 4 channel
         img_zlsb = zero_lsb(img)
 
         data_bin = ''.join(map(binary, bytearray(self.i_mark, 'utf-8')))
