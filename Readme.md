@@ -1,34 +1,76 @@
+<div align=center>
+<img src="https://user-images.githubusercontent.com/12653147/74099251-93627880-4b5c-11ea-9340-823cbc9eede6.png" />
+</div>
+
+
 # Intro
 
-It based on ffmpeg and opencv. There was 3 mode in wwmark. you can add text to a image or video, also you can add image to a image or video. i still try to make it better, like encrypt & decrpt text info to image or make it unvisible. and so on.
+It based on ffmpeg and opencv. Simply, you can add text or pictures to the target. we support the image, video and pdf to add watermark. Also, original intention is make a mark. So, it should be simply on bottom right, we don't support full screen watermark by default. So you can define it with your local config file with `p` field or use it with '--blind' options. If you want to look more detail, please read the document in FFMPEG homepage. 
+
+| Original / Watermark option | add image | add text | option (-p) | oprtion(--blind)    |
+|-----------------------------|-----------|----------|-------------|---------------------|
+| image                       | √         | √        | √           | √                   |
+| video                       | √         | √        | √           | ×                   |
+| pdf                         | √         | √        | √           | √（But not working) |
 
 # Useage
 
+<div align=center>
+
+[![asciicast](https://asciinema.org/a/7cwAWEuXm3BN9E10hwhirTm5b.svg)](https://asciinema.org/a/7cwAWEuXm3BN9E10hwhirTm5b)
+
+</div>
+
 ```bash
 
-i➜  wwmark : master ✘ :✭ ᐅ  python main.py config -f config.json
-
-i➜  wwmark : master ✘ :✭ ᐅ  python main.py image -i ../test/video/h.mp4 -m ../test/images/wm.png -o ssss.mp4
-
-i➜  wwmark : master ✘ :✭ ᐅ  python main.py image -i ../test/video/h.mp4 -m ../test/images/wm.png -p '{ "x": "main_w-overlay_w-5","y": "5"}'  -o ssss.mp4
-
-i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i ../test/images/guest.jpg -m "人生何处不相逢" -p '{"x":"10", "y":"10","fontsize":"66","fontfile":"DroidSansFallbackFull.ttf"}' -o ian.jpeg
-
-i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i test/a.pdf -m "人生何处不相逢" -o b.pdf
-
-i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i test/a.pdf -m "人生何处不相逢" -o b.pdf
-
-i➜  wwmark : master ✘ :✹ ᐅ  python main.py text -i test/images/guest.jpg -m "人生何处不相逢" -o here.png --blind
-
-i➜  wwmark : master ✘ :✹ ᐅ  python main.py image -i test/images/guest.jpg -m test/images/wm.png -o wocao.png --blind
-
-i➜  wwmark : master ✘ :✹ ᐅ  python main.py show --type text -i here.png
-
-i➜  wwmark : master ✘ :✹ ᐅ  python main.py show --type image -i test/images/guest.jpg -m wocao.png -o test.jpg
+> # echo add image watermark
+> python main.py image -i test/h.mp4 -m test/wm.png -o test/h2.mp4
+> python main.py image -i test/DLP\ ml.pdf -m test/wm.png -o test/xxx.pdf
+> python main.py image -i test/guest.jpg -m test/wm.png -o wi_guest.png
+> # echo with blind watermark
+> python main.py image -i test/guest.jpg -m test/wm.png -o wi_guest.png --blind
+> # also you can add text watermark
+> python main.py text -i test/h.mp4 -m "WOWW" -p '{"fontsize":"50"}' -o test/h3.mp4
+> python main.py text -i test/guest.jpg -m "人生何处不相逢" -o test/wt_guest.png
+> python main.py text -i test/guest.jpg -m "人生何处不相逢" -o test/wt_guest.png --blind
+> # if you got blind watermark, may be you want show it
+> python main.py show --type text test/wt_guest.png
+> python main.py show --type text -i test/wt_guest.png
+> python main.py show --type image -i test/wi_guest.png -m test/wm.png -o wm.show.png
+> python main.py show --type image -i test/guest.jpg -m test/wi_guest.png -o wm.show.png
 
 ```
 
 > it's good way to check your font file in linux system: `fc-list :lang=zh`
+
+## Advance With Config file
+
+Just run `python main.py config -f config.json`
+
+`config.json` 
+```json
+{
+    "action" : "text",
+    "i" : "test/guest.jpg",
+    "m" : "人生得意须尽欢",
+    "o" : "whoareu.jpg",
+    "p" : { 
+        "x" : "main_w/3",
+        "y" : "10",
+        "fontsize" : "66",
+        "fontfile" : "DroidSansFallbackFull.ttf",
+        "box" : "1",
+        "boxcolor" : "red"
+    }
+}
+```
+
+# TODO
+
+* [ ] Delete Logo (OCR + Delete Logo)
+* [ ] Web UI & Handwriting
+* [ ] Human Kindly Output
+* [ ] Encrype Sinature Automaticly
 
 # Resources
 

@@ -35,7 +35,7 @@ def setting(i,p,b):
 def cli():
     pass
 
-@cli.command()
+@cli.command(help="Advanced mode, add watermark with config file")
 @click.option('-f', help="Advanced mode, All from config file")
 def config(f):
     if os.path.exists(f):
@@ -46,7 +46,7 @@ def config(f):
             elif str.lower(c['action']) == "image":
                 Wwmark(i_file=c['i'], i_mark=c['m'], o_file=c['o'], blind=c['b'], **c['p']).image()
 
-@cli.command()
+@cli.command(help="Add text watermark")
 @click.option('-i', help="Your input file path, it can be image or video")
 @click.option('-m', help="Your mark file path, it only can be text")
 @click.option('-o', help="Your output file path, ")
@@ -61,7 +61,7 @@ def text(i, m, o, blind, p):
 
     Wwmark(i_file=i, i_mark=m, o_file=o, blind=b, **p).text()
 
-@cli.command()
+@cli.command(help="Add image watermark")
 @click.option('-i', help="Your input file path, it can be image or video")
 @click.option('-m', help="Your mark file path, it can be image or video")
 @click.option('-o', help="Your output file path, ")
@@ -77,7 +77,7 @@ def image(i, m, o, blind, p):
     Wwmark(i_file=i, i_mark=m, o_file=o, blind=b, **p).image()
 
 
-@cli.command()
+@cli.command(help="Show the blind watermark")
 @click.option('-i', help="Your original image path, text blind watermark didn't need it")
 @click.option('-m', help="Your blind watermark image", default=None)
 @click.option('-o', help="Your output file path")

@@ -51,6 +51,17 @@ class OverlayImage(Enum):
         "y": "main_h-overlay_h-5",
     }
 
+def Binary2String(binary):
+    index = 0
+    string = []
+    rec = lambda x, i: x[2:8] + (rec(x[8:], i-1) if i > 1 else '') if x else ''
+    fun = lambda x, i: x[i+1:8] + rec(x[8:], i-1)
+    while index + 1 < len(binary):
+        chartype = binary[index:].index('0')
+        length = chartype*8 if chartype else 8
+        string.append(chr(int(fun(binary[index:index+length], chartype), 2)))
+        index += length
+    return ''.join(string)
 
 class Wwmark(object):
 
@@ -88,24 +99,25 @@ class Wwmark(object):
                     wm[rwm.shape[0] - i - 1][rwm.shape[1] - j - 1] = wm[i][j]
             assert cv2.imwrite(self.o_file, wm)
 
-        if mark == "text":
-            def Binary2String(binary):
-                index = 0
-                string = []
-                rec = lambda x, i: x[2:8] + (rec(x[8:], i-1) if i > 1 else '') if x else ''
-                fun = lambda x, i: x[i+1:8] + rec(x[8:], i-1)
-                while index + 1 < len(binary):
-                    chartype = binary[index:].index('0')
-                    length = chartype*8 if chartype else 8
-                    string.append(chr(int(fun(binary[index:index+length], chartype), 2)))
-                    index += length
-                return ''.join(string)
+        else:
+            # I was wondering why it didn't work
+            if mark == "pdf":
+                with tempfile.TemporaryDirectory() as temp:
+                    convert_from_path(self.i_file, output_folder=temp,
+                                    thread_count=1, output_file=lambda x: x+1)
 
-            img = Image.open(self.i_file)
+                    self.i_file = os.path.join(temp, sorted(os.listdir(temp))[0])
+                    img = Image.open(self.i_file).convert("RGBA")
+            
+            # Decode text blind image 
+            else:
+                img = Image.open(self.i_file)
+
             pixels = list(img.getdata())
             binary = ''.join([str(int(r>>1<<1!=r))+str(int(g>>1<<1!=g))+str(int(b>>1<<1!=b))+str(int(t>>1<<1!=t)) for (r,g,b,t) in pixels])
             location = binary.find('0'*16)
             endIndex = location+(8-(location%8)) if location%8!=0 else location
+
             data = Binary2String(binary[0: endIndex])
             print("[INFO]:\t",data)
 
@@ -120,33 +132,27 @@ class Wwmark(object):
 
             for item in sorted(os.listdir(temp)):
 
-                backgroud = ffmpeg.input(os.path.join(temp, item))
+                self.i_file = os.path.join(temp, item)
+                it = os.path.join(temp, "{}.png".format(item))
 
                 if mark == "text":
-                    ol = ffmpeg.drawtext(
-                        backgroud, text=self.i_mark, **self.kwargs)
+                    self.text(path=it)
 
                 if mark == "image":
-                    ol = ffmpeg.overlay(backgroud, ffmpeg.input(
-                        self.i_mark), **self.kwargs)
-
-                # if format with png, that's would be problem with RGBA, im.convert('RGB')
-                it = os.path.join(temp, "{}.jpg".format(item))
-
-                self.save(ol, path=it)
+                    self.image(path=it)
 
                 with open(it, 'rb') as f:
                     im = Image.open(f)
                     im.load()
-                    ims.append(im)
+                    ims.append(im.convert('RGB'))
                     # ims.append(im.convert('RGB'))
 
         ims[0].save(self.o_file, "PDF", resolution=100.0,
                     save_all=True, append_images=ims[1:])
 
-    def text(self):
+    def text(self,path=None):
         if not self.blind:
-            return self.save(ffmpeg.drawtext(ffmpeg.input(self.i_file), text=self.i_mark, **self.kwargs))
+            return self.save(ffmpeg.drawtext(ffmpeg.input(self.i_file), text=self.i_mark, **self.kwargs),path)
 
         # blind text based on lsb
         # This part code modified from internet
@@ -172,12 +178,12 @@ class Wwmark(object):
                             t+int(data_bin[index*4+3])) if index*4 < len(data_bin) else (r,g,b,t) for index, (r,g,b,t) in enumerate(list(img_zlsb.getdata()))]
         encodedImage = Image.new(img.mode, img.size)
         encodedImage.putdata(encodedPixels)
-        encodedImage.save(self.o_file)
+        encodedImage.save(path if path else self.o_file)
 
 
-    def image(self):
+    def image(self,path=None):
         if not self.blind:
-            return self.save(ffmpeg.overlay(ffmpeg.input(self.i_file), ffmpeg.input(self.i_mark), **self.kwargs))
+            return self.save(ffmpeg.overlay(ffmpeg.input(self.i_file), ffmpeg.input(self.i_mark), **self.kwargs),path)
 
         # Blind Image
         # This part code modified from https://github.com/chishaxie/BlindWaterMark
@@ -214,7 +220,7 @@ class Wwmark(object):
 
         img_wm = np.real(np.fft.ifft2(f2))
 
-        assert cv2.imwrite(self.o_file, img_wm, [
+        assert cv2.imwrite(path if path else self.o_file, img_wm, [
                            int(cv2.IMWRITE_JPEG_QUALITY), 100])
 
     def save(self, stream, path=None):
