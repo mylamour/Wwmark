@@ -26,3 +26,4 @@ i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i test/a.pdf -m "人生
 * [ffmpeg-python](https://github.com/kkroening/ffmpeg-python/)
 * [ffmpeg simply useage](http://iami.xyz/Image-Parse/)
 * [ffmpeg overlay](https://ffmpeg.org/ffmpeg-filters.html#overlay-1)
+* [BlindWaterMark](https://github.com/chishaxie/BlindWaterMark)
