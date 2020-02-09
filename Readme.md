@@ -16,6 +16,16 @@ i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i ../test/images/guest.
 
 i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i test/a.pdf -m "人生何处不相逢" -o b.pdf
 
+i➜  wwmark : master ✘ :✭ ᐅ  python main.py text -i test/a.pdf -m "人生何处不相逢" -o b.pdf
+
+i➜  wwmark : master ✘ :✹ ᐅ  python main.py text -i test/images/guest.jpg -m "人生何处不相逢" -o here.png --blind
+
+i➜  wwmark : master ✘ :✹ ᐅ  python main.py image -i test/images/guest.jpg -m test/images/wm.png -o wocao.png --blind
+
+i➜  wwmark : master ✘ :✹ ᐅ  python main.py show --type text -i here.png
+
+i➜  wwmark : master ✘ :✹ ᐅ  python main.py show --type image -i test/images/guest.jpg -m wocao.png -o test.jpg
+
 ```
 
 > it's good way to check your font file in linux system: `fc-list :lang=zh`
