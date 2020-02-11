@@ -14,11 +14,12 @@ mime = magic.Magic(mime=True)
 def setting(i,p,b):
 
     if mime.from_file(i) == "application/pdf":
-        i_type = "pdf"
+        i_type = "pdf" 
+        b = False   # look like can't save image to pdf with RGBA mode?
 
     elif mime.from_file(i).startswith("video/"):
         i_type = "video"
-        b = False   # video type force to False, because it can't be blind
+        b = False   # video type force to False
 
     elif mime.from_file(i).startswith("image/"):
         i_type = "image"
@@ -26,10 +27,14 @@ def setting(i,p,b):
     else:
         sys.exit(1)
 
-    if p not in (OverlayText.DEFAULT.value, OverlayImage.DEFAULT.value ):
-        p = json.loads(p)
+    position = str.upper(p)
 
-    return i_type, p, b
+    if position in OverlayText.__members__.keys() or position in OverlayImage.__members__.keys():
+        pconfig = OverlayImage.__members__.get(position).value if OverlayImage.__members__.get(position) else OverlayText.__members__.get(position).value
+    else:
+        pconfig = json.loads(p)
+
+    return i_type, pconfig, b
 
 @click.group()
 def cli():
@@ -50,7 +55,7 @@ def config(f):
 @click.option('-i', help="Your input file path, it can be image or video")
 @click.option('-m', help="Your mark file path, it only can be text")
 @click.option('-o', help="Your output file path, ")
-@click.option('-p', help='mark postion, with like this { "x": "15","y": "5"}', default=OverlayText.DEFAULT.value)
+@click.option('-p', help='mark position, with like this { "x": "15","y": "5"}', default="DEFAULT")
 @click.option('--blind/--no-blind', help='Blind or not?', default=False)
 def text(i, m, o, blind, p):
 
@@ -65,7 +70,7 @@ def text(i, m, o, blind, p):
 @click.option('-i', help="Your input file path, it can be image or video")
 @click.option('-m', help="Your mark file path, it can be image or video")
 @click.option('-o', help="Your output file path, ")
-@click.option('-p', help='mark postion, with like this {"x": "main_w-overlay_w-5","y": "5"}', default=OverlayImage.DEFAULT.value)
+@click.option('-p', help='mark position, with like this {"x": "main_w-overlay_w-5","y": "5"},default support CENTER, TOPLEFT, TOPRIGHT, BOTTOMLEFT, BOTTOMRIGHT', default="BOTTOMRIGHT")
 @click.option('--blind/--no-blind', help='Encode your image', default=False)
 def image(i, m, o, blind, p):
 
@@ -88,6 +93,14 @@ def show(i, m, o, type):
         sys.exit(1)
 
     return Wwmark(i_file=i, i_mark=m, o_file=o, blind=None).show(str.lower(type))
+
+
+@cli.command(help="clean the watermark")
+@click.option('-i', help="Your watermark image path")
+@click.option('-o', help="Your output file path")
+@click.option('--type', help="Your blind file type, image or text", default="image")
+def clean(i, o, type):
+    return Wwmark(i_file=i, i_mark=None, o_file=o, blind=None).clean()
 
 # @click.group(chain=True)
 # def cli2():

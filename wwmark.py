@@ -27,6 +27,12 @@ class OverlayText(Enum):
 
 class OverlayImage(Enum):
 
+    DEFAULT = TEST = {
+        "x": "(main_w-overlay_w)/2",
+        "y": "(main_h-overlay_h)/2",
+        # "enable":"between(t,438/25,606/25)"
+    }
+
     CENTER = {
         "x": "(main_w-overlay_w)/2",
         "y": "(main_h-overlay_h)/2",
@@ -46,7 +52,7 @@ class OverlayImage(Enum):
         "x": "5",
         "y": "main_h-overlay_h",
     }
-    DEFAULT = BOTTOMRIGHT = {
+    BOTTOMRIGHT = {
         "x": "main_w-overlay_w-5",
         "y": "main_h-overlay_h-5",
     }
@@ -72,6 +78,13 @@ class Wwmark(object):
         self.o_file = o_file
         self.kwargs = kwargs
         self.blind = blind
+    
+    def clean(self):
+        img = cv2.imread(self.i_file)
+        alpha = 2.0
+        beta = -160
+        new = np.clip(alpha * img + beta, 0, 255).astype(np.uint8)
+        cv2.imwrite(self.o_file, new)
 
     def show(self, mark="image"):
         if mark == "image":
@@ -144,13 +157,13 @@ class Wwmark(object):
                 with open(it, 'rb') as f:
                     im = Image.open(f)
                     im.load()
+                    # ims.append(im)
                     ims.append(im.convert('RGB'))
-                    # ims.append(im.convert('RGB'))
 
         ims[0].save(self.o_file, "PDF", resolution=100.0,
                     save_all=True, append_images=ims[1:])
 
-    def text(self,path=None):
+    def text(self, path=None):
         if not self.blind:
             return self.save(ffmpeg.drawtext(ffmpeg.input(self.i_file), text=self.i_mark, **self.kwargs),path)
 
@@ -180,10 +193,10 @@ class Wwmark(object):
         encodedImage.putdata(encodedPixels)
         encodedImage.save(path if path else self.o_file)
 
-
-    def image(self,path=None):
+    def image(self, path=None):
         if not self.blind:
-            return self.save(ffmpeg.overlay(ffmpeg.input(self.i_file), ffmpeg.input(self.i_mark), **self.kwargs),path)
+            #  colorchannelmixer would make it transparent
+            return self.save(ffmpeg.overlay(ffmpeg.input(self.i_file), ffmpeg.input(self.i_mark).colorchannelmixer(aa=0.4), **self.kwargs),path)
 
         # Blind Image
         # This part code modified from https://github.com/chishaxie/BlindWaterMark

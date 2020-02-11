@@ -7,11 +7,11 @@
 
 It based on ffmpeg and opencv. Simply, you can add text or pictures to the target. we support the image, video and pdf to add watermark. Also, original intention is make a mark. So, it should be simply on bottom right, we don't support full screen watermark by default. So you can define it with your local config file with `p` field or use it with '--blind' options. If you want to look more detail, please read the document in FFMPEG homepage. 
 
-| Original / Watermark option | add image | add text | option (-p) | oprtion(--blind)    |
-|-----------------------------|-----------|----------|-------------|---------------------|
-| image                       | √         | √        | √           | √                   |
-| video                       | √         | √        | √           | ×                   |
-| pdf                         | √         | √        | √           | √（But not working) |
+| Original / Watermark option | add image | add text | custom position (-p) | invisible(--blind) |
+|-----------------------------|-----------|----------|----------------------|--------------------|
+| image                       | √         | √        | √                    | √                  |
+| video                       | √         | √        | √                    | ×                  |
+| pdf                         | √         | √        | √                    | x                  |
 
 # Useage
 
@@ -38,7 +38,9 @@ It based on ffmpeg and opencv. Simply, you can add text or pictures to the targe
 > python main.py show --type text -i test/wt_guest.png
 > python main.py show --type image -i test/wi_guest.png -m test/wm.png -o wm.show.png
 > python main.py show --type image -i test/guest.jpg -m test/wi_guest.png -o wm.show.png
-
+> # custom your watermark location
+> python main.py image -i test/DLP\ ml.pdf -m test/wm.png -o test/xxx.pdf -p center
+> python main.py image -i test/a.pdf -m test/wm.png -o test/test.pdf -p '{"x": "main_w-overlay_w-5","y": "5"}'
 ```
 
 > it's good way to check your font file in linux system: `fc-list :lang=zh`
@@ -71,11 +73,14 @@ Just run `python main.py config -f config.json`
 * [ ] Web UI & Handwriting
 * [ ] Human Kindly Output
 * [ ] Encrype Sinature Automaticly
+* [ ] tests & setup.sh
 
 # Resources
 
+* [关于水印这件“小事”](https://github.com/mylamour/blog/issues/71)
 * [how to add transparent watermark](https://stackoverflow.com/questions/10918907/how-to-add-transparent-watermark-in-center-of-a-video-with-ffmpeg)
 * [ffmpeg-python](https://github.com/kkroening/ffmpeg-python/)
+* [ffmpeg-python docs](https://kkroening.github.io/ffmpeg-python/)
 * [ffmpeg simply useage](http://iami.xyz/Image-Parse/)
 * [ffmpeg overlay](https://ffmpeg.org/ffmpeg-filters.html#overlay-1)
 * [BlindWaterMark](https://github.com/chishaxie/BlindWaterMark)
