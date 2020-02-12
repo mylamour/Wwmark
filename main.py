@@ -27,14 +27,15 @@ def setting(i,p,b):
     else:
         sys.exit(1)
 
-    position = str.upper(p)
+    if p:
+        position = str.upper(p)
 
-    if position in OverlayText.__members__.keys() or position in OverlayImage.__members__.keys():
-        pconfig = OverlayImage.__members__.get(position).value if OverlayImage.__members__.get(position) else OverlayText.__members__.get(position).value
-    else:
-        pconfig = json.loads(p)
+        if position in OverlayText.__members__.keys() or position in OverlayImage.__members__.keys():
+            p = OverlayImage.__members__.get(position).value if OverlayImage.__members__.get(position) else OverlayText.__members__.get(position).value
+        else:
+            p = json.loads(p)
 
-    return i_type, pconfig, b
+    return i_type, p, b
 
 @click.group()
 def cli():
@@ -95,12 +96,16 @@ def show(i, m, o, type):
     return Wwmark(i_file=i, i_mark=m, o_file=o, blind=None).show(str.lower(type))
 
 
-@cli.command(help="clean the watermark")
+@cli.command(help="clean the watermark, Good effect for translucency watermark")
 @click.option('-i', help="Your watermark image path")
+@click.option('-m', help="Your blind watermark image", default=None)
 @click.option('-o', help="Your output file path")
-@click.option('--type', help="Your blind file type, image or text", default="image")
-def clean(i, o, type):
-    return Wwmark(i_file=i, i_mark=None, o_file=o, blind=None).clean()
+@click.option('--type', help="Your blind file type, image or text", default=None)
+def clean(i, m, o, type):
+    if not type:
+        type,_,_ = setting(i,None,None)
+
+    return Wwmark(i_file=i, i_mark=m, o_file=o, blind=None).clean(type)
 
 # @click.group(chain=True)
 # def cli2():

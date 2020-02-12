@@ -78,13 +78,62 @@ class Wwmark(object):
         self.o_file = o_file
         self.kwargs = kwargs
         self.blind = blind
+        self.action = None  # "mark" or "clean"
     
-    def clean(self):
-        img = cv2.imread(self.i_file)
-        alpha = 2.0
-        beta = -160
-        new = np.clip(alpha * img + beta, 0, 255).astype(np.uint8)
-        cv2.imwrite(self.o_file, new)
+    def clean(self, type="image"):
+        if type == "image":
+            self.remove(type,out=self.o_file)
+        
+        if type == "pdf":
+            self.action = "clean"
+            self.pdf()
+
+
+
+
+    def remove(self,type="image",out=None):
+        if self.i_mark == None:
+            # Try without original mark file. Lucky ?
+            img = cv2.imread(self.i_file)
+            alpha = 2.0
+            beta = -160
+            new = np.clip(alpha * img + beta, 0, 255).astype(np.uint8)
+            cv2.imwrite(out, new)
+
+        else:
+            # For translucency watermark
+            # Code from https://stackoverflow.com/questions/32125281/removing-watermark-out-of-an-image-using-opencv/32141019
+            img = cv2.imread(self.i_file)
+            gr = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+            # Make a copy of the grayscale image
+            bg = gr.copy()
+
+            # Apply morphological transformations
+            for i in range(5):
+                kernel2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                                    (2 * i + 1, 2 * i + 1))
+                bg = cv2.morphologyEx(bg, cv2.MORPH_CLOSE, kernel2)
+                bg = cv2.morphologyEx(bg, cv2.MORPH_OPEN, kernel2)
+
+            # Subtract the grayscale image from its processed copy
+            dif = cv2.subtract(bg, gr)
+
+            # Apply thresholding
+            bw = cv2.threshold(dif, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+            dark = cv2.threshold(bg, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+
+            # Extract pixels in the dark region
+            darkpix = gr[np.where(dark > 0)]
+
+            # Threshold the dark region to get the darker pixels inside it
+            darkpix = cv2.threshold(darkpix, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+
+            # Paste the extracted darker pixels in the watermark region
+            bw[np.where(dark > 0)] = darkpix.T
+
+            cv2.imwrite(out, bw)
+
 
     def show(self, mark="image"):
         if mark == "image":
@@ -148,11 +197,16 @@ class Wwmark(object):
                 self.i_file = os.path.join(temp, item)
                 it = os.path.join(temp, "{}.png".format(item))
 
-                if mark == "text":
-                    self.text(path=it)
+#  this part code look like dirty
+                if self.action == "clean":
+                    self.remove(out=it)
+                
+                else:
+                    if mark == "text":
+                        self.text(path=it)
 
-                if mark == "image":
-                    self.image(path=it)
+                    if mark == "image":
+                        self.image(path=it)
 
                 with open(it, 'rb') as f:
                     im = Image.open(f)
