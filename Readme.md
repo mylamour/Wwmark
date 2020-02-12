@@ -19,7 +19,13 @@ It based on ffmpeg and opencv. Simply, you can add text or pictures to the targe
 
 ```bash
 sudo apt-get install python3-pip python3-setuptools python3-opencv ffmpeg
+git clone https://github.com/mylamour/Wwmark && cd Wwmark
 pip3 install -r requirements.txt
+
+# if you want to install this tools, alias it with shell config file
+# echo alias wwmark=\"python $PWD/main.py\"  >> ~/.zshrc
+# source ~/.zshrc
+
 ```
 
 # Useage
