@@ -65,31 +65,58 @@ pip3 install -r requirements.txt
 
 ## Advance With Config file
 
-Just run `python main.py config -f config.json`
+Just run `python main.py config -f config.json`. The following field must be included:
+* action: text/image
+* i: input file path
+* m: mark text or mark file path
+* o: output processed file path
+* b: blind watermark or not, only support image blind
+* p: custom parameters for your action with ffmpeg, image should checkout `overlay`, text should checkout `drawtext`
+* p -> location: custom location, only for select special pdf pages
+* p -> aa: only for image watermark process, 0-1.0 with different tranparency
 
-`config.json` 
+`config.json` for add text
 ```json
 {
     "action" : "text",
-    "i" : "test/guest.jpg",
+    "i" : "test/a.pdf",
     "m" : "人生得意须尽欢",
-    "o" : "whoareu.jpg",
+    "o" : "test/test.pdf",
+    "b" : false,
     "p" : { 
         "x" : "main_w/3",
         "y" : "10",
         "fontsize" : "66",
         "fontfile" : "DroidSansFallbackFull.ttf",
         "box" : "1",
-        "boxcolor" : "red"
+        "boxcolor" : "red"        
     }
 }
+```
+
+`config.json` for add image
+```json
+{
+    "action" : "text",
+    "i" : "test/a.pdf",
+    "m" : "test/wm.png",
+    "o" : "test/test.pdf",
+    "b" : false,
+    "p" : { 
+        "location" : "2,4,6",
+        "x" : "main_w/3",
+        "y" : "10",
+        "aa": "0.4",
+    }
+}
+
 ```
 
 # TODO
 
 * [ ] Delete Logo (OCR + Delete Logo)
 * [ ] Web UI & Handwriting
-* [ ] Human Kindly Output
+* [ ] Human Kindly Output & Docs
 * [ ] Encrype Sinature Automaticly
 * [ ] tests & setup.sh
 

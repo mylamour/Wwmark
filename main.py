@@ -27,7 +27,7 @@ def setting(i,p,b):
     else:
         sys.exit(1)
 
-    if p:
+    if p and type(p) == str :
         position = str.upper(p)
 
         if position in OverlayText.__members__.keys() or position in OverlayImage.__members__.keys():
@@ -47,10 +47,17 @@ def config(f):
     if os.path.exists(f):
         with open(f,'r', encoding="utf-8") as config:
             c = json.load(config)
+
+            i_type, p, b = setting(c['i'],c['p'],c['b'])
+
+            if i_type == "pdf":
+                    return Wwmark(i_file=c['i'], i_mark=c['m'], o_file=c['o'], blind=b, **p).pdf(c['action'])
+
             if str.lower(c['action']) == "text":
-                Wwmark(i_file=c['i'], i_mark=c['m'], o_file=c['o'], blind=c['b'], **c['p']).text()
+                return Wwmark(i_file=c['i'], i_mark=c['m'], o_file=c['o'], blind=b, **p).text()
+
             elif str.lower(c['action']) == "image":
-                Wwmark(i_file=c['i'], i_mark=c['m'], o_file=c['o'], blind=c['b'], **c['p']).image()
+                return Wwmark(i_file=c['i'], i_mark=c['m'], o_file=c['o'], blind=b, **p).image()
 
 @cli.command(help="Add text watermark")
 @click.option('-i', help="Your input file path, it can be image or video")

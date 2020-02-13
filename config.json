@@ -1,14 +1,16 @@
 {
     "action" : "text",
-    "i" : "../test/images/guest.jpg",
+    "i" : "test/a.pdf",
     "m" : "人生得意须尽欢",
-    "o" : "whoareu.jpg",
+    "o" : "test/sign.pdf",
+    "b" : false,
     "p" : { 
+        "location" : "2,4,6",
         "x" : "main_w/3",
         "y" : "10",
         "fontsize" : "66",
         "fontfile" : "DroidSansFallbackFull.ttf",
         "box" : "1",
-        "boxcolor" : "red"
+        "boxcolor" : "red"        
     }
 }

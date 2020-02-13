@@ -30,7 +30,7 @@ class OverlayImage(Enum):
     DEFAULT = TEST = {
         "x": "(main_w-overlay_w)/2",
         "y": "(main_h-overlay_h)/2",
-        # "enable":"between(t,438/25,606/25)"
+        "aa": "0.4",        
     }
 
     CENTER = {
@@ -69,6 +69,7 @@ def Binary2String(binary):
         index += length
     return ''.join(string)
 
+# May be need a decorator to locate it
 class Wwmark(object):
 
     def __init__(self, i_file, i_mark, o_file, blind, **kwargs):
@@ -87,9 +88,6 @@ class Wwmark(object):
         if type == "pdf":
             self.action = "clean"
             self.pdf()
-
-
-
 
     def remove(self,type="image",out=None):
         if self.i_mark == None:
@@ -133,7 +131,6 @@ class Wwmark(object):
             bw[np.where(dark > 0)] = darkpix.T
 
             cv2.imwrite(out, bw)
-
 
     def show(self, mark="image"):
         if mark == "image":
@@ -184,6 +181,19 @@ class Wwmark(object):
             print("[INFO]:\t",data)
 
     def pdf(self, mark="text"):
+
+        locs = None
+    
+        if self.kwargs.get("location"):
+            flag = self.kwargs.pop("location")
+            if "," in flag:
+                locs = list(map(lambda x: int(x)-1,flag.split(",")))
+            elif "-" in flag:
+                loc = list(map(int,flag.split('-'))) 
+                locs = list(range(loc[0]-1 ,loc[1]))
+            else:
+                locs = [int(flag)]
+
         ims = []
 
         with tempfile.TemporaryDirectory() as temp:
@@ -191,22 +201,29 @@ class Wwmark(object):
             # Original uuid generator is not sortable
             convert_from_path(self.i_file, output_folder=temp,
                               thread_count=1, output_file=lambda x: x+1)
+            
+            items = sorted(os.listdir(temp))
 
-            for item in sorted(os.listdir(temp)):
+            for k, item in enumerate(items):
 
                 self.i_file = os.path.join(temp, item)
                 it = os.path.join(temp, "{}.png".format(item))
 
-#  this part code look like dirty
-                if self.action == "clean":
-                    self.remove(out=it)
-                
-                else:
-                    if mark == "text":
-                        self.text(path=it)
+                #  this part code look like dirty
+                #  if not found special locs, just rename it
+                if locs != None and locs.count(k) == 0:
+                    os.rename(self.i_file,it)
 
-                    if mark == "image":
-                        self.image(path=it)
+                else:
+                    if self.action == "clean":
+                        self.remove(out=it)
+                    
+                    else:
+                        if mark == "text":
+                            self.text(path=it)
+
+                        if mark == "image":
+                            self.image(path=it)
 
                 with open(it, 'rb') as f:
                     im = Image.open(f)
@@ -250,7 +267,8 @@ class Wwmark(object):
     def image(self, path=None):
         if not self.blind:
             #  colorchannelmixer would make it transparent
-            return self.save(ffmpeg.overlay(ffmpeg.input(self.i_file), ffmpeg.input(self.i_mark).colorchannelmixer(aa=0.4), **self.kwargs),path)
+            #  Add "aa" as part of config, but still pass parameters with self.kwarges
+            return self.save(ffmpeg.overlay(ffmpeg.input(self.i_file), ffmpeg.input(self.i_mark).colorchannelmixer(aa=self.kwargs.pop("aa") if self.kwargs.get("aa") else "0.5" ), **self.kwargs),path)
 
         # Blind Image
         # This part code modified from https://github.com/chishaxie/BlindWaterMark
