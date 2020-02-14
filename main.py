@@ -28,10 +28,15 @@ def setting(i,p,b):
         sys.exit(1)
 
     if p and type(p) == str :
+        
         position = str.upper(p)
 
-        if position in OverlayText.__members__.keys() or position in OverlayImage.__members__.keys():
-            p = OverlayImage.__members__.get(position).value if OverlayImage.__members__.get(position) else OverlayText.__members__.get(position).value
+        if inspect.stack()[1].function == "text" and position in OverlayText.__members__.keys():
+            p = OverlayText.__members__.get(position).value
+
+        elif inspect.stack()[1].function == "image" and position in OverlayImage.__members__.keys():
+            p = OverlayImage.__members__.get(position).value
+            
         else:
             p = json.loads(p)
 

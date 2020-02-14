@@ -1,7 +1,10 @@
-opencv_python==4.2.0.32
 pdf2image==1.11.0
 ffmpeg_python==0.2.0
 Click==7.0
+colorama==0.3.7
+opencv_python==4.2.0.32
+tqdm==4.32.1
+numpy==1.16.4
 ffmpeg==1.4
 Pillow==7.0.0
 python_magic==0.4.15

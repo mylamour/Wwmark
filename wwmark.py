@@ -8,6 +8,8 @@ import numpy as np
 from enum import Enum
 from PIL import Image
 from pdf2image import convert_from_path
+from tqdm import tqdm
+from colorama import Fore 
 
 
 BLIND = {
@@ -88,6 +90,7 @@ class Wwmark(object):
         if type == "pdf":
             self.action = "clean"
             self.pdf()
+            print("[NOTICE]: Please checkout your output file {} {}".format(Fore.RED, self.o_file))
 
     def remove(self,type="image",out=None):
         if self.i_mark == None:
@@ -108,7 +111,7 @@ class Wwmark(object):
             bg = gr.copy()
 
             # Apply morphological transformations
-            for i in range(5):
+            for i in tqdm(range(5),ascii=True, ncols=199, desc="[REMOVE] {} Processed ".format(self.i_file)):
                 kernel2 = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
                                                     (2 * i + 1, 2 * i + 1))
                 bg = cv2.morphologyEx(bg, cv2.MORPH_CLOSE, kernel2)
@@ -153,10 +156,11 @@ class Wwmark(object):
             for i in range(int(rwm.shape[0] * 0.5)):
                 for j in range(rwm.shape[1]):
                     wm[m[i]][n[j]] = np.uint8(rwm[i][j])
-            for i in range(int(rwm.shape[0] * 0.5)):
+            for i in tqdm(range(int(rwm.shape[0] * 0.5)), ncols=199, ascii=True, desc="[EXTRACT] {} try to find blind watermark".format(self.i_file),total=None):
                 for j in range(rwm.shape[1]):
                     wm[rwm.shape[0] - i - 1][rwm.shape[1] - j - 1] = wm[i][j]
             assert cv2.imwrite(self.o_file, wm)
+            print("[NOTICE]: Please checkout your output file {} {}".format(Fore.RED, self.o_file))
 
         else:
             # I was wondering why it didn't work
@@ -173,12 +177,13 @@ class Wwmark(object):
                 img = Image.open(self.i_file)
 
             pixels = list(img.getdata())
-            binary = ''.join([str(int(r>>1<<1!=r))+str(int(g>>1<<1!=g))+str(int(b>>1<<1!=b))+str(int(t>>1<<1!=t)) for (r,g,b,t) in pixels])
+            binary = ''.join([str(int(r >> 1 << 1 != r))+str(int(g >> 1 << 1 != g))+str(int(b >> 1 << 1 != b))+str(int(t >> 1 << 1 != t))
+                              for (r, g, b, t) in tqdm(pixels, ncols=199, ascii=True, desc="[EXTRACT] {} try to find blind watermark".format(self.i_file))])
             location = binary.find('0'*16)
             endIndex = location+(8-(location%8)) if location%8!=0 else location
 
             data = Binary2String(binary[0: endIndex])
-            print("[INFO]:\t",data)
+            print("[NOTICE]: {} {}".format(Fore.RED, data))
 
     def pdf(self, mark="text"):
 
@@ -204,7 +209,7 @@ class Wwmark(object):
             
             items = sorted(os.listdir(temp))
 
-            for k, item in enumerate(items):
+            for k, item in tqdm(enumerate(items), ncols=199, ascii=True, desc="[{}] {} watermark with {}".format(str.upper(self.action) if self.action else "ADD", self.i_file, self.i_mark), unit="page"):
 
                 self.i_file = os.path.join(temp, item)
                 it = os.path.join(temp, "{}.png".format(item))
@@ -233,6 +238,8 @@ class Wwmark(object):
 
         ims[0].save(self.o_file, "PDF", resolution=100.0,
                     save_all=True, append_images=ims[1:])
+        
+        print("[NOTICE]: Please checkout your output file {} {}".format(Fore.RED, self.o_file))
 
     def text(self, path=None):
         if not self.blind:
@@ -259,10 +266,12 @@ class Wwmark(object):
         encodedPixels = [(r+int(data_bin[index*4+0]),
                             g+int(data_bin[index*4+1]),
                             b+int(data_bin[index*4+2]),
-                            t+int(data_bin[index*4+3])) if index*4 < len(data_bin) else (r,g,b,t) for index, (r,g,b,t) in enumerate(list(img_zlsb.getdata()))]
+                            t+int(data_bin[index*4+3])) if index*4 < len(data_bin) else (r,g,b,t) for index, (r,g,b,t) in tqdm(enumerate(list(img_zlsb.getdata())), ncols=199, ascii=True, desc="[ADD] {} watermark with {}".format(self.i_file, self.o_file))]
         encodedImage = Image.new(img.mode, img.size)
         encodedImage.putdata(encodedPixels)
         encodedImage.save(path if path else self.o_file)
+
+        print("[NOTICE]: Please checkout your output file {} {}".format(Fore.RED, self.o_file))
 
     def image(self, path=None):
         if not self.blind:
@@ -307,6 +316,8 @@ class Wwmark(object):
 
         assert cv2.imwrite(path if path else self.o_file, img_wm, [
                            int(cv2.IMWRITE_JPEG_QUALITY), 100])
+                           
+        print("[NOTICE]: Please checkout your output file {} {}".format(Fore.RED, self.o_file))
 
     def save(self, stream, path=None):
         if path is None:
